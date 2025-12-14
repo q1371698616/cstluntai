@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>轮胎库存管理系统</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <div id="app">
+        <!-- 登录页面 -->
+        <div id="loginPage" class="page active">
+            <div class="login-container">
+                <div class="login-header">
+                    <h1>轮胎库存管理系统</h1>
+                    <p>Tire Inventory Management System</p>
+                </div>
+                <div class="login-form">
+                    <div class="form-group">
+                        <input type="text" id="loginUsername" placeholder="请输入用户名" autocomplete="username">
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="loginPassword" placeholder="请输入密码" autocomplete="current-password">
+                    </div>
+                    <button class="btn btn-primary btn-block" onclick="login()">登录</button>
+                    <div class="login-footer">
+                        <a href="#" onclick="showRegisterPage()">注册账号</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 注册页面 -->
+        <div id="registerPage" class="page">
+            <div class="register-container">
+                <div class="page-header">
+                    <button class="btn-back" onclick="showLoginPage()">返回</button>
+                    <h2>用户注册</h2>
+                </div>
+                <div class="register-form">
+                    <div class="form-group">
+                        <input type="text" id="regUsername" placeholder="用户名 (3-50个字符)" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="regPassword" placeholder="密码 (至少6位)" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="regPasswordConfirm" placeholder="确认密码" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="regRealname" placeholder="真实姓名 (可选)">
+                    </div>
+                    <div class="form-group">
+                        <input type="tel" id="regPhone" placeholder="手机号 (可选)">
+                    </div>
+                    <div class="form-group">
+                        <input type="email" id="regEmail" placeholder="邮箱 (可选)">
+                    </div>
+                    <button class="btn btn-primary btn-block" onclick="register()">注册</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主页面 -->
+        <div id="mainPage" class="page">
+            <!-- 顶部导航栏 -->
+            <div class="navbar">
+                <div class="navbar-title">轮胎库存系统</div>
+                <div class="navbar-menu">
+                    <span id="usernameDisplay"></span>
+                    <button class="btn btn-sm" onclick="logout()">退出</button>
+                </div>
+            </div>
+
+            <!-- 底部导航 -->
+            <div class="bottom-nav">
+                <div class="nav-item active" onclick="switchTab('home')">
+                    <i class="icon">🏠</i>
+                    <span>首页</span>
+                </div>
+                <div class="nav-item" onclick="switchTab('categories')">
+                    <i class="icon">📋</i>
+                    <span>分类</span>
+                </div>
+                <div class="nav-item" onclick="switchTab('scan')">
+                    <i class="icon scan-icon">📷</i>
+                    <span>扫码</span>
+                </div>
+                <div class="nav-item" onclick="switchTab('records')">
+                    <i class="icon">📊</i>
+                    <span>记录</span>
+                </div>
+                <div class="nav-item" onclick="switchTab('profile')">
+                    <i class="icon">👤</i>
+                    <span>我的</span>
+                </div>
+            </div>
+
+            <!-- 主内容区 -->
+            <div class="main-content">
+                <!-- 首页 -->
+                <div id="homeTab" class="tab-content active">
+                    <div class="search-bar">
+                        <input type="text" id="searchKeyword" placeholder="搜索商品名称或型号">
+                        <button class="btn btn-primary" onclick="searchProducts()">搜索</button>
+                    </div>
+
+                    <div class="product-list" id="productList">
+                        <!-- 商品列表动态加载 -->
+                    </div>
+                </div>
+
+                <!-- 分类浏览 -->
+                <div id="categoriesTab" class="tab-content">
+                    <div class="categories-container">
+                        <div class="category-level-1" id="categoryLevel1">
+                            <!-- 一级分类 -->
+                        </div>
+                        <div class="category-level-2" id="categoryLevel2">
+                            <!-- 二级分类 -->
+                        </div>
+                        <div class="category-level-3" id="categoryLevel3">
+                            <!-- 三级分类 -->
+                        </div>
+                    </div>
+                    <div class="category-products" id="categoryProducts">
+                        <!-- 分类下的商品 -->
+                    </div>
+                </div>
+
+                <!-- 扫码操作 -->
+                <div id="scanTab" class="tab-content">
+                    <div class="scan-container">
+                        <div class="scan-type-tabs">
+                            <button class="scan-type-tab active" onclick="switchScanType('inbound')">入库</button>
+                            <button class="scan-type-tab" onclick="switchScanType('outbound')">出库</button>
+                        </div>
+
+                        <div class="scan-camera">
+                            <button class="btn btn-primary btn-block" onclick="startScan()">
+                                📷 开始扫码
+                            </button>
+                            <p class="scan-tip">点击按钮开始扫描条形码</p>
+                        </div>
+
+                        <div class="scan-list" id="scanList">
+                            <!-- 扫描的条形码列表 -->
+                        </div>
+
+                        <div id="outboundExtra" class="outbound-extra" style="display: none;">
+                            <div class="form-group">
+                                <label>车牌号</label>
+                                <input type="text" id="licensePlate" placeholder="请输入或拍照识别车牌号">
+                                <button class="btn btn-sm" onclick="captureLicensePlate()">📷 拍照识别</button>
+                            </div>
+                        </div>
+
+                        <div class="scan-actions">
+                            <button class="btn btn-primary btn-block" onclick="submitScan()">
+                                提交
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 记录查询 -->
+                <div id="recordsTab" class="tab-content">
+                    <div class="records-tabs">
+                        <button class="record-tab active" onclick="switchRecordType('inbound')">入库记录</button>
+                        <button class="record-tab" onclick="switchRecordType('outbound')">出库记录</button>
+                    </div>
+
+                    <div class="records-filter">
+                        <input type="date" id="recordStartDate" placeholder="开始日期">
+                        <input type="date" id="recordEndDate" placeholder="结束日期">
+                        <input type="text" id="recordBarcode" placeholder="条形码">
+                        <input type="text" id="recordLicensePlate" placeholder="车牌号" style="display: none;">
+                        <button class="btn btn-primary" onclick="searchRecords()">查询</button>
+                    </div>
+
+                    <div class="records-list" id="recordsList">
+                        <!-- 记录列表 -->
+                    </div>
+                </div>
+
+                <!-- 个人中心 -->
+                <div id="profileTab" class="tab-content">
+                    <div class="profile-header">
+                        <div class="profile-avatar">👤</div>
+                        <div class="profile-info">
+                            <div class="profile-name" id="profileName"></div>
+                            <div class="profile-role" id="profileRole"></div>
+                        </div>
+                    </div>
+
+                    <div class="profile-stats" id="profileStats">
+                        <!-- 统计信息 -->
+                    </div>
+
+                    <div class="profile-menu">
+                        <div class="menu-item" onclick="showChangePassword()">
+                            <span>🔑 修改密码</span>
+                            <span class="arrow">›</span>
+                        </div>
+                        <div class="menu-item" onclick="showDashboard()" id="dashboardMenuItem" style="display: none;">
+                            <span>📊 数据大屏</span>
+                            <span class="arrow">›</span>
+                        </div>
+                        <div class="menu-item" onclick="showAdminPanel()" id="adminMenuItem" style="display: none;">
+                            <span>⚙️ 管理后台</span>
+                            <span class="arrow">›</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 商品详情页 -->
+        <div id="productDetailPage" class="page">
+            <div class="page-header">
+                <button class="btn-back" onclick="closeProductDetail()">返回</button>
+                <h2>商品详情</h2>
+            </div>
+            <div class="product-detail" id="productDetail">
+                <!-- 商品详情内容 -->
+            </div>
+        </div>
+
+        <!-- 管理后台 -->
+        <div id="adminPage" class="page">
+            <div class="page-header">
+                <button class="btn-back" onclick="closeAdminPanel()">返回</button>
+                <h2>管理后台</h2>
+            </div>
+            <div class="admin-tabs">
+                <button class="admin-tab active" onclick="switchAdminTab('products')">商品管理</button>
+                <button class="admin-tab" onclick="switchAdminTab('barcodes')">条形码管理</button>
+                <button class="admin-tab" onclick="switchAdminTab('categories')">分类管理</button>
+                <button class="admin-tab" onclick="switchAdminTab('users')">用户管理</button>
+            </div>
+            <div class="admin-content" id="adminContent">
+                <!-- 管理内容 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast 提示 -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Loading 遮罩 -->
+    <div id="loading" class="loading">
+        <div class="spinner"></div>
+    </div>
+
+    <script src="utils/api.js"></script>
+    <script src="utils/scanner.js"></script>
+    <script src="components/app.js"></script>
+</body>
+</html>
