@@ -38,7 +38,8 @@ tire-inventory-system/
 │   │   ├── categories.php # 分类管理
 │   │   ├── inventory.php  # 入库/出库
 │   │   ├── records.php    # 记录查询
-│   │   └── upload.php     # 文件上传
+│   │   ├── upload.php     # 文件上传
+│   │   └── batch_import.php # 批量导入
 │   ├── config/            # 配置文件
 │   │   ├── config.php     # 系统配置
 │   │   └── database.php   # 数据库配置
@@ -61,7 +62,8 @@ tire-inventory-system/
 │   ├── schema.sql         # 数据库结构
 │   └── sample_data.sql    # 示例数据
 └── docs/                  # 文档
-    └── DEPLOYMENT.md      # 部署文档
+    ├── DEPLOYMENT.md      # 部署文档
+    └── BATCH_IMPORT.md    # 批量导入说明
 ```
 
 ## 快速开始
@@ -197,7 +199,10 @@ chown -R www-data:www-data backend/uploads
 
 1. **商品管理**
    - 添加/编辑/删除商品
-   - 批量导入
+   - 批量导入（文本识别）⭐
+     - 智能解析商品文本
+     - 自动创建分类
+     - 一键批量添加
    - 商品分类
 
 2. **条形码管理** ⭐
@@ -412,6 +417,15 @@ ini_set('display_errors', 1);
 
 ## 更新日志
 
+### v1.1.0 (2024-12-14)
+- ✅ 新增批量导入商品功能
+  - 智能文本解析
+  - 自动创建分类
+  - 一键批量添加
+  - 导入预览和结果反馈
+- ✅ 完善管理后台功能
+- ✅ 新增批量导入使用文档
+
 ### v1.0.0 (2024-12-12)
 - ✅ 初始版本发布
 - ✅ 完整的前后端功能
@@ -423,7 +437,6 @@ ini_set('display_errors', 1);
 ## 开发计划
 
 - [ ] 数据大屏可视化
-- [ ] 完善管理后台
 - [ ] 导出 Excel 报表
 - [ ] 微信小程序版本
 - [ ] APP 原生版本
