@@ -248,5 +248,21 @@ const API = {
             method: 'POST',
             body: JSON.stringify({ base64, type })
         });
+    },
+
+    // 批量导入
+    batchImport: {
+        parseText: (text, autoCreate = false) => {
+            return request(`${API_BASE_URL}/batch_import.php?action=parse-text`, {
+                method: 'POST',
+                body: JSON.stringify({ text, auto_create: autoCreate })
+            });
+        },
+        import: (products) => {
+            return request(`${API_BASE_URL}/batch_import.php?action=import`, {
+                method: 'POST',
+                body: JSON.stringify({ products })
+            });
+        }
     }
 };

@@ -850,3 +850,141 @@ body {
     font-size: 12px;
     color: var(--text-secondary);
 }
+
+/* 批量导入 */
+.batch-import-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.batch-import-help {
+    background: var(--white);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.batch-import-help h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+}
+
+.batch-import-help p {
+    margin-bottom: 10px;
+    line-height: 1.6;
+}
+
+.batch-import-help pre {
+    background: var(--bg-color);
+    padding: 15px;
+    border-radius: 4px;
+    overflow-x: auto;
+    margin: 10px 0;
+    font-size: 13px;
+}
+
+.batch-import-help ul {
+    margin-left: 20px;
+    margin-top: 10px;
+}
+
+.batch-import-help li {
+    margin-bottom: 8px;
+    line-height: 1.6;
+}
+
+.batch-import-input {
+    background: var(--white);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.batch-import-input label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.batch-import-input textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 14px;
+    resize: vertical;
+}
+
+.batch-import-input textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.batch-import-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.batch-import-actions button {
+    flex: 1;
+}
+
+.batch-import-preview {
+    background: var(--white);
+    padding: 20px;
+    border-radius: 8px;
+    min-height: 100px;
+}
+
+.batch-import-preview h3 {
+    color: var(--text-color);
+    margin-bottom: 15px;
+}
+
+.preview-table {
+    overflow-x: auto;
+    margin-bottom: 20px;
+}
+
+.preview-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.preview-table th,
+.preview-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--bg-color);
+}
+
+.preview-table th {
+    background: var(--bg-color);
+    font-weight: bold;
+}
+
+.preview-table tbody tr:hover {
+    background: var(--bg-color);
+}
+
+.preview-actions {
+    margin-top: 20px;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .batch-import-actions {
+        flex-direction: column;
+    }
+
+    .preview-table {
+        font-size: 12px;
+    }
+
+    .preview-table th,
+    .preview-table td {
+        padding: 8px;
+    }
+}

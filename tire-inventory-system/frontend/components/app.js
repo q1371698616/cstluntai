@@ -679,12 +679,203 @@ function switchAdminTab(tab) {
     });
     event.target.classList.add('active');
 
-    // TODO: 加载对应的管理内容
-    document.getElementById('adminContent').innerHTML = `
-        <div style="text-align:center;padding:40px;color:#999;">
-            ${tab} 管理功能开发中...
+    const adminContent = document.getElementById('adminContent');
+
+    // 批量导入
+    if (tab === 'batch-import') {
+        adminContent.innerHTML = `
+            <div class="batch-import-container">
+                <div class="batch-import-help">
+                    <h3>📝 批量导入说明</h3>
+                    <p>支持文本格式批量导入商品，格式示例：</p>
+                    <pre>135/70R12 万达 120元
+145/70R12 玲珑130元 朝阳 130元 正新 170元
+165R14 三角 230元 玲珑 210元 正新350元</pre>
+                    <p><strong>规则说明：</strong></p>
+                    <ul>
+                        <li>一级分类：R12、R13、R14 等（自动从规格中提取）</li>
+                        <li>二级、三级分类：完整规格如 135/70R12、165R14</li>
+                        <li>商品名：规格 + 品牌（如：135/70R12 万达）</li>
+                        <li>价格：数字 + 元</li>
+                        <li>一行可包含多个品牌和价格</li>
+                    </ul>
+                </div>
+
+                <div class="batch-import-input">
+                    <label>粘贴商品文本：</label>
+                    <textarea id="batchImportText" rows="15" placeholder="请粘贴商品信息..."></textarea>
+                </div>
+
+                <div class="batch-import-actions">
+                    <button class="btn btn-primary" onclick="parseImportText()">解析文本</button>
+                    <button class="btn btn-success" onclick="confirmImport()">直接导入</button>
+                </div>
+
+                <div id="batchImportPreview" class="batch-import-preview">
+                    <!-- 解析结果预览 -->
+                </div>
+            </div>
+        `;
+    } else {
+        // 其他管理功能
+        adminContent.innerHTML = `
+            <div style="text-align:center;padding:40px;color:#999;">
+                ${tab} 管理功能开发中...
+            </div>
+        `;
+    }
+}
+
+// 解析导入文本
+async function parseImportText() {
+    const text = document.getElementById('batchImportText').value.trim();
+    if (!text) {
+        showToast('请输入要导入的文本');
+        return;
+    }
+
+    showLoading();
+    try {
+        const result = await API.batchImport.parseText(text, false);
+        hideLoading();
+
+        if (result.success) {
+            showToast(`成功解析 ${result.data.parsed_count} 个商品`);
+            renderImportPreview(result.data.products);
+        } else {
+            showToast(result.message);
+        }
+    } catch (error) {
+        hideLoading();
+        showToast('解析失败');
+    }
+}
+
+// 渲染导入预览
+function renderImportPreview(products) {
+    const preview = document.getElementById('batchImportPreview');
+
+    if (products.length === 0) {
+        preview.innerHTML = '<div style="text-align:center;padding:20px;color:#999;">未解析到任何商品</div>';
+        return;
+    }
+
+    preview.innerHTML = `
+        <h3>📋 解析结果（共 ${products.length} 个商品）</h3>
+        <div class="preview-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>商品名</th>
+                        <th>型号</th>
+                        <th>分类</th>
+                        <th>价格</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${products.map(p => `
+                        <tr>
+                            <td>${p.name}</td>
+                            <td>${p.model}</td>
+                            <td>${p.category1} / ${p.spec}</td>
+                            <td>¥${p.price}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
+        <div class="preview-actions">
+            <button class="btn btn-success btn-block" onclick="executeImport(${JSON.stringify(products).replace(/"/g, '&quot;')})">
+                确认导入这些商品
+            </button>
         </div>
     `;
+}
+
+// 确认导入（直接导入，不预览）
+async function confirmImport() {
+    const text = document.getElementById('batchImportText').value.trim();
+    if (!text) {
+        showToast('请输入要导入的文本');
+        return;
+    }
+
+    if (!confirm('确定要直接导入这些商品吗？')) {
+        return;
+    }
+
+    showLoading();
+    try {
+        const result = await API.batchImport.parseText(text, true);
+        hideLoading();
+
+        if (result.success) {
+            const data = result.data;
+            let message = `导入完成！\n成功：${data.success_count} 个\n失败：${data.failed_count} 个`;
+
+            if (data.failed_count > 0 && data.failed_items.length > 0) {
+                message += '\n\n失败原因：\n';
+                data.failed_items.slice(0, 5).forEach(item => {
+                    message += `- ${item.product}: ${item.reason}\n`;
+                });
+                if (data.failed_items.length > 5) {
+                    message += `...还有 ${data.failed_items.length - 5} 个失败项`;
+                }
+            }
+
+            alert(message);
+
+            if (data.success_count > 0) {
+                document.getElementById('batchImportText').value = '';
+                document.getElementById('batchImportPreview').innerHTML = '';
+            }
+        } else {
+            showToast(result.message);
+        }
+    } catch (error) {
+        hideLoading();
+        showToast('导入失败');
+    }
+}
+
+// 执行导入
+async function executeImport(products) {
+    if (!confirm(`确定要导入这 ${products.length} 个商品吗？`)) {
+        return;
+    }
+
+    showLoading();
+    try {
+        const result = await API.batchImport.import(products);
+        hideLoading();
+
+        if (result.success) {
+            const data = result.data;
+            let message = `导入完成！\n成功：${data.success_count} 个\n失败：${data.failed_count} 个`;
+
+            if (data.failed_count > 0 && data.failed_items.length > 0) {
+                message += '\n\n失败原因：\n';
+                data.failed_items.slice(0, 5).forEach(item => {
+                    message += `- ${item.product}: ${item.reason}\n`;
+                });
+                if (data.failed_items.length > 5) {
+                    message += `...还有 ${data.failed_items.length - 5} 个失败项`;
+                }
+            }
+
+            alert(message);
+
+            if (data.success_count > 0) {
+                document.getElementById('batchImportText').value = '';
+                document.getElementById('batchImportPreview').innerHTML = '';
+            }
+        } else {
+            showToast(result.message);
+        }
+    } catch (error) {
+        hideLoading();
+        showToast('导入失败');
+    }
 }
 
 // 初始化
